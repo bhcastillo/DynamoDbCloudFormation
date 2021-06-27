@@ -1,0 +1,50 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: DynamoDB without indexes
+
+################### Parameters  ###################    
+Parameters:
+  ReadCapacityUnits:
+    Description: Provisioned read throughput
+    Type: Number
+    Default: 5
+    MinValue: 5
+    MaxValue: 10000
+    ConstraintDescription: must be between 5 and 10000
+  WriteCapacityUnits:
+    Description: Provisioned write throughput
+    Type: Number
+    Default: 10
+    MinValue: 5
+    MaxValue: 10000
+    ConstraintDescription: must be between 5 and 10000
+
+
+################### Resources  ################### 
+Resources: 
+  DynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - 
+          AttributeName: Username
+          AttributeType: S 
+        - 
+          AttributeName: MatchMode
+          AttributeType: S
+      KeySchema:
+        - 
+          AttributeName: Username
+          KeyType: HASH
+        -
+          AttributeName: MatchMode
+          KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: !Ref ReadCapacityUnits
+        WriteCapacityUnits: !Ref WriteCapacityUnits 
+      TableName: callofDutyWithoutIndexes
+
+################### Outputs  ################### 
+Outputs:
+  TableName:
+    Value: !Ref DynamoDBTable
+    Description: Name of the newly created DynamoDB table

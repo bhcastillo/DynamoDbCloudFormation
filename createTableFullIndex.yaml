@@ -1,0 +1,118 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: dynamoDB
+
+################### Parameters  ###################      
+Parameters:
+  ReadCapacityUnits:
+    Description: Provisioned read throughput
+    Type: Number
+    Default: 5
+    MinValue: 5
+    MaxValue: 10000
+    ConstraintDescription: must be between 5 and 10000
+  WriteCapacityUnits:
+    Description: Provisioned write throughput
+    Type: Number
+    Default: 10
+    MinValue: 5
+    MaxValue: 10000
+    ConstraintDescription: must be between 5 and 10000
+    
+################### Resources  ###################      
+Resources:
+
+  DynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - 
+          AttributeName: Username
+          AttributeType: S
+        - 
+          AttributeName: MatchMode
+          AttributeType: S
+        - 
+          AttributeName: League
+          AttributeType: S
+        - 
+          AttributeName: Year
+          AttributeType: S
+      KeySchema:
+        - 
+          AttributeName: Username
+          KeyType: HASH
+        - 
+          AttributeName: MatchMode
+          KeyType: RANGE
+      
+      ProvisionedThroughput:
+        ReadCapacityUnits: !Ref ReadCapacityUnits
+        WriteCapacityUnits: !Ref WriteCapacityUnits
+      GlobalSecondaryIndexes:
+        - 
+          IndexName: UsernameGlobalIndex
+          KeySchema:
+            - 
+              AttributeName: MatchMode
+              KeyType: HASH
+          Projection:
+            ProjectionType: INCLUDE
+            NonKeyAttributes:
+              - Username
+              - Win
+              - Kills
+              - MatchMode
+          ProvisionedThroughput:
+            ReadCapacityUnits: !Ref ReadCapacityUnits
+            WriteCapacityUnits: !Ref WriteCapacityUnits
+        - 
+          IndexName: YearGlobalIndex
+          KeySchema:
+            - 
+              AttributeName: Year
+              KeyType: HASH
+          Projection:
+            ProjectionType: INCLUDE
+            NonKeyAttributes:
+              - Username
+              - Win
+          ProvisionedThroughput:
+            ReadCapacityUnits: !Ref ReadCapacityUnits
+            WriteCapacityUnits: !Ref WriteCapacityUnits
+      LocalSecondaryIndexes:
+        - 
+          IndexName: LeagueIndex
+          KeySchema:
+            - 
+              AttributeName: Username
+              KeyType: HASH
+            - 
+              AttributeName: League
+              KeyType: RANGE
+          Projection:
+            ProjectionType: INCLUDE
+            NonKeyAttributes:
+              - Username
+              - Win
+              - League
+        - 
+          IndexName: YearLocalIndex
+          KeySchema:
+            - 
+              AttributeName: Username
+              KeyType: HASH
+            - 
+              AttributeName: Year
+              KeyType: RANGE
+          Projection:
+            ProjectionType: INCLUDE
+            NonKeyAttributes:
+              - Win
+              - Kills       
+      TableName: callOfDutyFull
+
+################### Outputs  ###################      
+Outputs:
+  TableName:
+    Value: !Ref DynamoDBTable
+    Description: Name of the newly created DynamoDB table
